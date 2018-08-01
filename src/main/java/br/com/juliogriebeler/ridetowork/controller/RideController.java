@@ -25,9 +25,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import br.com.juliogriebeler.model.Ride;
-import br.com.juliogriebeler.repository.RideRepository;
 import br.com.juliogriebeler.ridetowork.exception.RideException;
+import br.com.juliogriebeler.ridetowork.model.Ride;
+import br.com.juliogriebeler.ridetowork.repository.RideRepository;
 
 /**
  * @author juliofg
@@ -53,7 +53,7 @@ public class RideController {
 				bytes = dishImage.getBytes();
 				Path path = Paths.get(fileName);
 				Files.write(path, bytes);
-				ride.setDishImage(fileName);
+				//ride.setDishImage(fileName);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -65,9 +65,9 @@ public class RideController {
 	@ResponseBody
 	@CrossOrigin
 	public List<Ride> findAll(Model model) {
-		if(model.containsAttribute("isVegetarian")) {
-			System.out.println("IS VEG");
-			return rideRepository.findByIsVegetarian(Boolean.TRUE);
+		if(model.containsAttribute("isSomeAttribute")) {
+			System.out.println("IS ATTR");
+			return rideRepository.findAll();
 		}
 		System.out.println("NOT VEG");
 		return rideRepository.findAll();

@@ -1,12 +1,12 @@
-package br.com.juliogriebeler.ridetowork.payload;
+package br.com.juliogriebeler.ridetowork.model;
 
-public class UploadFileResponse {
+public class UploadFile {
     private String fileName;
     private String fileDownloadUri;
     private String fileType;
     private long size;
 
-    public UploadFileResponse(String fileName, String fileDownloadUri, String fileType, long size) {
+    public UploadFile(String fileName, String fileDownloadUri, String fileType, long size) {
         this.fileName = fileName;
         this.fileDownloadUri = fileDownloadUri;
         this.fileType = fileType;

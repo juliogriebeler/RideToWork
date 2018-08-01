@@ -1,7 +1,7 @@
 /**
  * 
  */
-package br.com.juliogriebeler.model;
+package br.com.juliogriebeler.ridetowork.model;
 
 /**
  * @author juliofg

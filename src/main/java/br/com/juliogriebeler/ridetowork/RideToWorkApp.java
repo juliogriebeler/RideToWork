@@ -1,4 +1,4 @@
-package br.com.juliogriebeler;
+package br.com.juliogriebeler.ridetowork;
 
 
 import org.springframework.boot.SpringApplication;

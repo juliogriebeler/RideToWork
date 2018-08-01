@@ -13,43 +13,48 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.juliogriebeler.ridetowork.exception.FileStorageException;
 import br.com.juliogriebeler.ridetowork.exception.MyFileNotFoundException;
+import br.com.juliogriebeler.ridetowork.model.UploadFile;
 import br.com.juliogriebeler.ridetowork.properties.FileStorageProperties;
+import br.com.juliogriebeler.ridetowork.repository.UploadFileRepository;
 
 @Service
-public class FileStorageService {
+public class UploadFileService {
 
-    private final Path fileStorageLocation;
+    private final Path uploadFileLocation;
+    
+    @Autowired
+    private UploadFileRepository uploadFileRepository;
 
     @Autowired
-    public FileStorageService(FileStorageProperties fileStorageProperties) {
-        this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir())
+    public UploadFileService(FileStorageProperties fileStorageProperties) {
+        this.uploadFileLocation = Paths.get(fileStorageProperties.getUploadDir())
                 .toAbsolutePath().normalize();
-
         try {
-            Files.createDirectories(this.fileStorageLocation);
+            Files.createDirectories(this.uploadFileLocation);
         } catch (Exception ex) {
             throw new FileStorageException("Could not create the directory where the uploaded files will be stored.", ex);
         }
     }
 
-    public String storeFile(MultipartFile file) {
-        // Normalize file name
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-
+    public UploadFile storeFile(MultipartFile file) {
+    	String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/downloadFile/")
+                .path(fileName)
+                .toUriString();
         try {
-            // Check if the file's name contains invalid characters
             if(fileName.contains("..")) {
                 throw new FileStorageException("Sorry! Filename contains invalid path sequence " + fileName);
             }
-
-            // Copy file to the target location (Replacing existing file with the same name)
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
+            Path targetLocation = this.uploadFileLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
-            return fileName;
+            UploadFile uploadFile = new UploadFile(fileName, fileDownloadUri,
+                    file.getContentType(), file.getSize());
+            return uploadFileRepository.save(uploadFile);
         } catch (IOException ex) {
             throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
         }
@@ -57,7 +62,7 @@ public class FileStorageService {
 
     public Resource loadFileAsResource(String fileName) {
         try {
-            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            Path filePath = this.uploadFileLocation.resolve(fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
             if(resource.exists()) {
                 return resource;
